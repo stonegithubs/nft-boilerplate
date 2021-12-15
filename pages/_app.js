@@ -1,5 +1,5 @@
 import { Web3ReactProvider, Web3Provider } from "@web3-react/core";
-import Layout from "../components/layout";
+import Layout from "../components/Layout";
 import { ethers } from "ethers";
 
 import "./global.css";
