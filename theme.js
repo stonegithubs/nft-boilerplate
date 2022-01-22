@@ -2,7 +2,7 @@ import { createTheme } from "@mui/material";
 
 const Theme = createTheme({
   typography: {
-    fontFamily: "Readex Pro, Arial",
+    fontFamily: "Homemade Apple, Arial",
   },
   components: {
     MuiCssBaseline: {

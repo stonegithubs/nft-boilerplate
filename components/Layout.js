@@ -6,13 +6,15 @@ import Header from "../components/Header";
 export default function Layout({ children }) {
   return (
     <ThemeProvider theme={theme}>
-      <Head></Head>
+      <Head>
+        <style>
+          @import
+          url('https://fonts.googleapis.com/css2?family=Homemade+Apple&display=swap');
+        </style>
+      </Head>
       {/* <Header /> */}
       <Box
-        sx={{
-          animation: "bgcolor 60s infinite",
-        }}
-        // maxWidth={"lg"}
+      // maxWidth={"lg"}
       >
         {children}
       </Box>

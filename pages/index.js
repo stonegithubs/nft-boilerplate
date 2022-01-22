@@ -38,10 +38,14 @@ export default function Home() {
   return (
     <Box
       sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
+        textAlign: "center",
         height: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexDirection: "column",
+        pl: 5,
+        pr: 5,
       }}
     >
       {/* {!active && (
@@ -50,8 +54,21 @@ export default function Home() {
           <Button onClick={() => activate(walletConnect)}>WalletConnect</Button>
         </>
       )} */}
-      <Image src="/taisei.png" width={800} height={800} />
-      {/* {active && <Button onClick={mint}>Mint</Button>} */}
+      <img
+        src="/taisei.png"
+        style={{ height: "auto", width: "100%", maxWidth: 650 }}
+      />
+      <Typography fontSize={{ xs: 32, sm: 42, md: 50 }} sx={{ mt: 5, pb: 0 }}>
+        Dreamers
+      </Typography>
+      <Typography
+        fontSize={{
+          sm: 19,
+          md: 20,
+        }}
+      >
+        Minting 03/2022
+      </Typography>
     </Box>
   );
 }
