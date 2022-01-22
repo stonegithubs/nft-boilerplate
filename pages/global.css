@@ -1,7 +1,7 @@
 body {
   padding: 0;
   margin: 0;
-  animation: bgcolor 60s infinite;
+  animation: bgcolor 30s infinite;
 }
 
 @keyframes bgcolor {
