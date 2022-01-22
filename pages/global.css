@@ -1,1 +1,31 @@
-/* konnichiwa */
+body {
+  padding: 0;
+  margin: 0;
+}
+
+@keyframes bgcolor {
+  0% {
+    background-color: #644fad;
+  }
+  14% {
+    background-color: #f3b4b2;
+  }
+  28% {
+    background-color: #3a434e;
+  }
+  42% {
+    background-color: #6f99bd;
+  }
+  56% {
+    background-color: #ffd300;
+  }
+  70% {
+    background-color: #d43b3f;
+  }
+  84% {
+    background-color: #388c46;
+  }
+  100% {
+    background-color: #644fad;
+  }
+}

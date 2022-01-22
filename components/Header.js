@@ -16,11 +16,12 @@ import Account from "../components/Account";
 import Balance from "../components/Balance";
 import Davatar from "@davatar/react";
 
-const pages = ["Products", "Pricing", "Blog"];
-const settings = ["Profile", "Account", "Dashboard", "Logout"];
+const pages = [];
+const settings = ["Disconnect"];
 
 export default function Header() {
-  const { active, error, chainId, account, provider } = useWeb3React();
+  const { active, error, chainId, account, provider, deactivate } =
+    useWeb3React();
 
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
@@ -50,7 +51,7 @@ export default function Header() {
             component="div"
             sx={{ mr: 2, display: { xs: "none", md: "flex" } }}
           >
-            LOGO
+            NFT
           </Typography>
 
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
@@ -141,11 +142,15 @@ export default function Header() {
                     open={Boolean(anchorElUser)}
                     onClose={handleCloseUserMenu}
                   >
-                    {settings.map((setting) => (
-                      <MenuItem key={setting} onClick={handleCloseNavMenu}>
-                        <Typography textAlign="center">{setting}</Typography>
-                      </MenuItem>
-                    ))}
+                    <MenuItem
+                      key="deactivate"
+                      onClick={() => {
+                        handleCloseNavMenu();
+                        deactivate();
+                      }}
+                    >
+                      <Typography textAlign="center">Deactivate</Typography>
+                    </MenuItem>
                   </Menu>
                 </>
               )}

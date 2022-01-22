@@ -7,11 +7,18 @@ export default function Layout({ children }) {
   return (
     <ThemeProvider theme={theme}>
       <Head></Head>
-      <Header />
-      <Container>{children}</Container>
-      <Box>
-        <Typography>Footer</Typography>
+      {/* <Header /> */}
+      <Box
+        sx={{
+          animation: "bgcolor 60s infinite",
+        }}
+        // maxWidth={"lg"}
+      >
+        {children}
       </Box>
+      {/* <Box>
+        <Typography>Footer</Typography>
+      </Box> */}
     </ThemeProvider>
   );
 }

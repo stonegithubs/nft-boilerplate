@@ -16,6 +16,7 @@
     "@web3-react/injected-connector": "^6.0.7",
     "@web3-react/walletconnect-connector": "^6.2.8",
     "ethers": "^5.5.2",
+    "hardhat-watcher": "^2.1.1",
     "next": "latest",
     "react": "17.0.2",
     "react-dom": "17.0.2"
