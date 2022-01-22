@@ -38,12 +38,12 @@ export default function Home() {
   return (
     <Box
       sx={{
-        textAlign: "center",
         height: "100vh",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         flexDirection: "column",
+
         pl: 5,
         pr: 5,
       }}
@@ -54,10 +54,9 @@ export default function Home() {
           <Button onClick={() => activate(walletConnect)}>WalletConnect</Button>
         </>
       )} */}
-      <img
-        src="/taisei.png"
-        style={{ height: "auto", width: "100%", maxWidth: 650 }}
-      />
+      <Box maxWidth={650}>
+        <img src="/taisei.png" style={{ height: "auto", width: "100%" }} />
+      </Box>
       <Typography fontSize={{ xs: 32, sm: 42, md: 50 }} sx={{ mt: 5, pb: 0 }}>
         Dreamers
       </Typography>
