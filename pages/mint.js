@@ -3,13 +3,13 @@ import { useWeb3React } from "@web3-react/core";
 import { injected, walletConnect } from "../lib/connectors";
 import { useInactiveListener } from "../hooks/useInactiveListener";
 import useContract from "../hooks/useContract";
-// import NFT from "../contracts/NFT.json";
+import Medallions from "../contracts/Medallions.json";
 import Image from "next/image";
 
-// const contract = useContract(
-//   process.env.NEXT_PUBLIC_MINT_CONTRACT_ADDRESS,
-//   tokenMeta.abi
-// );
+const contract = useContract(
+  process.env.NEXT_PUBLIC_MINT_CONTRACT_ADDRESS,
+  tokenMeta.abi
+);
 
 export default function Home() {
   const context = useWeb3React();
@@ -26,12 +26,6 @@ export default function Home() {
     error,
   } = context;
 
-  /**
-   * states
-   * - sold out
-   * - available
-   */
-
   return (
     <Box
       sx={{
@@ -41,22 +35,20 @@ export default function Home() {
         transform: "translate(-50%, -50%)",
         textAlign: "center",
         minWidth: 350,
-        maxWidth: 550,
       }}
     >
       <img src="/taisei.png" style={{ height: "auto", width: "100%" }} />
 
       <Typography fontSize={{ xs: 32, sm: 42, md: 50 }} sx={{ mt: 5, pb: 0 }}>
-        Daydreams
+        Dreamers
       </Typography>
       <Typography
         fontSize={{
-          lineHeight: 5,
           sm: 19,
           md: 20,
         }}
       >
-        minting 03/2022
+        Minting 03/2022
         {/* {!active && (
         <>
           <Button onClick={() => activate(injected)}>Metamask</Button>
