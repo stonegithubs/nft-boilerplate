@@ -3,28 +3,28 @@ import { useWeb3React } from "@web3-react/core";
 import { injected, walletConnect } from "../lib/connectors";
 import { useInactiveListener } from "../hooks/useInactiveListener";
 import useContract from "../hooks/useContract";
-import Medallions from "../contracts/Medallions.json";
+// import Medallions from "../contracts/Medallions.json";
 import Image from "next/image";
 
-const contract = useContract(
-  process.env.NEXT_PUBLIC_MINT_CONTRACT_ADDRESS,
-  tokenMeta.abi
-);
+// const contract = useContract(
+//   process.env.NEXT_PUBLIC_MINT_CONTRACT_ADDRESS,
+//   tokenMeta.abi
+// );
 
 export default function Home() {
-  const context = useWeb3React();
-  const enableMint = false;
+  //   const context = useWeb3React();
+  //   const enableMint = false;
 
-  const {
-    connector,
-    library,
-    chainId,
-    account,
-    activate,
-    deactivate,
-    active,
-    error,
-  } = context;
+  //   const {
+  //     connector,
+  //     library,
+  //     chainId,
+  //     account,
+  //     activate,
+  //     deactivate,
+  //     active,
+  //     error,
+  //   } = context;
 
   return (
     <Box
