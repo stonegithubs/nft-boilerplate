@@ -9,8 +9,12 @@ require("dotenv").config({ path: ".env.local" });
 
 // todo these should ideally be rpc url with tokens if
 // client is leaking these keys
-const { ETHERSCAN_KEY, DEPLOYER_PRIVATE_KEY, RPC_URL_1, RPC_URL_4 } =
-  process.env;
+const {
+  ETHERSCAN_KEY,
+  DEPLOYER_PRIVATE_KEY,
+  NEXT_PUBLIC_RPC_URL_1,
+  NEXT_PUBLIC_RPC_URL_4,
+} = process.env;
 
 const config = {
   solidity: "0.8.7",
@@ -25,12 +29,12 @@ const config = {
   networks: {
     hardhat: {},
     mainnet: {
-      url: RPC_URL_1,
+      url: NEXT_PUBLIC_RPC_URL_1,
       chainId: 1,
       accounts: [`0x${DEPLOYER_PRIVATE_KEY}`],
     },
     rinkeby: {
-      url: RPC_URL_4,
+      url: NEXT_PUBLIC_RPC_URL_4,
       chainId: 4,
       accounts: [`0x${DEPLOYER_PRIVATE_KEY}`],
     },

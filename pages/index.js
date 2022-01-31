@@ -46,10 +46,15 @@ export default function Home() {
     >
       <img src="/taisei.png" style={{ height: "auto", width: "100%" }} />
 
-      <Typography fontSize={{ xs: 32, sm: 42, md: 50 }} sx={{ mt: 5, pb: 0 }}>
+      <Typography
+        fontFamily={"Homemade Apple"}
+        fontSize={{ xs: 32, sm: 42, md: 50 }}
+        sx={{ mt: 5, pb: 0 }}
+      >
         Daydreams
       </Typography>
       <Typography
+        fontFamily={"Homemade Apple"}
         fontSize={{
           lineHeight: 5,
           sm: 19,

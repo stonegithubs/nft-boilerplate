@@ -19,14 +19,18 @@ async function main() {
 
   console.log("Account balance:", (await deployer.getBalance()).toString());
 
-  const Token = await ethers.getContractFactory("Token");
-  const token = await Token.deploy();
-  await token.deployed();
+  const Daydreams = await ethers.getContractFactory("Daydreams");
+  const daydreams = await Daydreams.deploy(
+    "0x0000000000000000000000000000000000000000",
+    "0x0000000000000000000000000000000000000000",
+    10000
+  );
+  await daydreams.deployed();
 
-  console.log("Token address:", token.address);
+  console.log("Daydreams address:", daydreams.address);
 
   // We also save the contract's artifacts and address in the frontend directory
-  saveFrontendFiles(token);
+  saveFrontendFiles(daydreams);
 }
 
 function saveFrontendFiles(token) {
@@ -39,14 +43,14 @@ function saveFrontendFiles(token) {
 
   fs.writeFileSync(
     contractsDir + "/contract-address.json",
-    JSON.stringify({ Token: token.address }, undefined, 2)
+    JSON.stringify({ Daydreams: token.address }, undefined, 2)
   );
 
-  const TokenArtifact = artifacts.readArtifactSync("Token");
+  const Daydreams = artifacts.readArtifactSync("Daydreams");
 
   fs.writeFileSync(
-    contractsDir + "/Token.json",
-    JSON.stringify(TokenArtifact, null, 2)
+    contractsDir + "/Daydreams.json",
+    JSON.stringify(Daydreams, null, 2)
   );
 }
 

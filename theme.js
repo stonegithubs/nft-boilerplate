@@ -2,13 +2,13 @@ import { createTheme } from "@mui/material";
 
 const Theme = createTheme({
   typography: {
-    fontFamily: "Homemade Apple, Arial",
+    fontFamily: "Arial",
   },
   components: {
     MuiCssBaseline: {
       styleOverrides: `
           @font-face {
-            font-family: 'Raleway';
+            font-family: 'Homemade Apple';
             font-style: normal;
             font-display: swap;
             font-weight: 400;
