@@ -1,5 +1,9 @@
 //@ts-check
 import { Stack, Typography, Box, Button } from "@mui/material";
+import Loading from "../components/Loader";
+import axios from "axios";
+import { MerkleTree } from "merkletreejs";
+import { keccak256 } from "ethers/lib/utils";
 import { useWeb3React } from "@web3-react/core";
 import { network, injected, walletConnect } from "../lib/connectors";
 import { useInactiveListener } from "../hooks/useInactiveListener";
@@ -7,6 +11,7 @@ import useContract from "../hooks/useContract";
 import Daydreams from "../contracts/Daydreams.json";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { ethers } from "ethers";
 import contracts from "../contracts/contract-address.json";
 
 // const contract = useContract(
@@ -18,9 +23,10 @@ const MINT_ACTIVE = true; //process.env.NEXT_PUBLIC_MINT_ACTIVE;
 
 export default function Home() {
   const context = useWeb3React();
-  const [phase, setPhase] = useState();
-  const [isSoldOut, setIsSoldOut] = useState();
-
+  const [s, setMintState] = useState({});
+  const [wlState, setWLState] = useState({});
+  const [loading, setLoading] = useState();
+  const [error, setError] = useState();
   const {
     connector,
     library,
@@ -29,7 +35,7 @@ export default function Home() {
     activate,
     deactivate,
     active,
-    error,
+    error: connectError,
   } = context;
 
   const dd = useContract(contracts.Daydreams, Daydreams.abi);
@@ -40,21 +46,81 @@ export default function Home() {
 
   useEffect(() => {
     const fn = async () => {
-      const phase = await dd.phase();
-      const numSold = await dd.totalSupply();
-      const total = await dd.total();
-      const marketingSupply = await dd.reservedSupply();
+      try {
+        const { data } = await axios.get(`/api/vip/${account}`);
+        setWLState(data);
+      } catch (e) {
+        console.error(e);
+      }
+    };
 
-      setIsSoldOut(
-        total.toNumber() - marketingSupply - numSold.toNumber() === 0
-      );
-      setPhase(phase);
+    if (account && s.phase === 1) {
+      fn();
+    }
+  }, [account, s.phase]);
+
+  useEffect(() => {
+    const fn = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const phase = await dd.phase();
+        const numSold = await dd.totalSupply();
+        const total = await dd.total();
+        const marketingSupply = await dd.reservedSupply();
+
+        setMintState({
+          numSold: numSold.toNumber(),
+          total: total.toNumber(),
+          marketingSupply,
+          phase,
+        });
+      } catch (e) {
+        setError(tryParseReason(e));
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
     };
 
     if (active && !account) {
       fn();
     }
   }, [chainId, active]);
+
+  const tryParseReason = (err) => {
+    const res = err.data?.message?.match(
+      /.*reverted with reason.*'(?<reason>.*)'$/
+    );
+    return res?.groups?.reason || "Unknown Error";
+  };
+
+  const wlMint = async () => {
+    setLoading(true);
+    setError(null);
+
+    const qty = 2;
+
+    try {
+      const tx = await dd.whitelistMint(
+        qty,
+        wlState.proof.map((i) => ethers.utils.hexZeroPad(i, 32)),
+        {
+          value: ethers.utils.parseEther(
+            `${process.env.NEXT_PUBLIC_WL_PRICE * qty}`
+          ),
+        }
+      );
+
+      const res = await tx.wait();
+      console.log(res);
+    } catch (e) {
+      setError(tryParseReason(e));
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Box
@@ -70,9 +136,18 @@ export default function Home() {
       <img src="/taisei.png" style={{ height: "auto", width: "100%" }} />
 
       <Typography fontSize={{ xs: 32, sm: 42, md: 50 }} sx={{ mt: 5, pb: 0 }}>
-        Dreamers
+        Daydreams
       </Typography>
+      {error && <Typography>{error}</Typography>}
       {(() => {
+        if (loading) {
+          return (
+            <Box sx={{ display: "flex", justifyContent: "center" }}>
+              <Loading />
+            </Box>
+          );
+        }
+
         if (!MINT_ACTIVE) {
           return <InactiveMint />;
         }
@@ -81,24 +156,50 @@ export default function Home() {
           return <Typography>Loading</Typography>;
         }
 
-        if (isSoldOut) {
+        if (s.isSoldOut) {
           return <Box>Sold Out</Box>;
         }
 
-        if (phase == 0) {
+        if (s.phase == 0) {
           return <InactiveMint />;
         }
 
-        if (phase > 0 && !account) {
-          return <Connect />;
+        if (s.phase > 0 && !account) {
+          return (
+            <Box>
+              <MintsRemaining {...s} />
+              <Connect />
+            </Box>
+          );
         }
 
-        if (phase === 1) {
-          return <Box>{account} Whitelist Mint</Box>;
+        if (s.phase === 1) {
+          return (
+            <Box>
+              {/* whitelist mint check on account */}
+              <Typography>{account}</Typography>
+              {/* todo: loading */}
+              {wlState.valid && (
+                <Button variant="contained" onClick={wlMint}>
+                  {" "}
+                  Whitelist Mint
+                </Button>
+              )}
+              {!wlState.valid && (
+                <Typography>You are not on the whitelist</Typography>
+              )}
+            </Box>
+          );
         }
 
-        if (phase === 2) {
-          return <Box>Public Mint</Box>;
+        if (s.phase === 2) {
+          return (
+            <Box>
+              {/* whitelist mint check on account */}
+              <Typography>{account}</Typography>
+              <Button variant="contained"> Mint</Button>
+            </Box>
+          );
         }
       })()}
     </Box>
@@ -118,6 +219,10 @@ const Connect = () => {
     </Stack>
   );
 };
+
+const MintsRemaining = ({ total, numSold }) => (
+  <Typography component="div">{total - numSold} Remaining</Typography>
+);
 
 const InactiveMint = () => (
   <Box>

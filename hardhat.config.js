@@ -1,14 +1,13 @@
 require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-etherscan");
-require("./tasks/faucet");
 require("hardhat-watcher");
+require("./tasks/faucet");
 
-// weird to require this since next sorta deos
-// first case of conflation / redundancy between next/hardhat
 require("dotenv").config({ path: ".env.local" });
 
-// todo these should ideally be rpc url with tokens if
-// client is leaking these keys
+const contractAddresses = require("./contracts/contract-address.json");
+const contractMeta = require("./contracts/Daydreams.json");
+
 const {
   ETHERSCAN_KEY,
   DEPLOYER_PRIVATE_KEY,
@@ -43,6 +42,50 @@ const config = {
     apiKey: ETHERSCAN_KEY,
   },
 };
+
+task("set-merkle-root", "Sets merkle root").setAction(async () => {
+  const [signer, ...other] = await hre.ethers.getSigners();
+  const contract = new hre.ethers.Contract(
+    contractAddresses.Daydreams,
+    contractMeta.abi
+  );
+
+  const leafNodes = wl.map(keccak256);
+  const tree = new MerkleTree(leafNodes, keccak256, { sortPairs: true });
+  const root = tree.getRoot();
+  const tx = await contract.connect(signer).setMerkleRoot(tree.getHexRoot());
+  await tx.wait();
+});
+
+task("set-merkle-root", "Sets merkle root").setAction(async () => {
+  const wl = require("./public/whitelist.json");
+  const keccak256 = require("keccak256");
+  const contract = new hre.ethers.Contract(
+    contractAddresses.Daydreams,
+    contractMeta.abi
+  );
+
+  const { MerkleTree } = require("merkletreejs");
+  const leafNodes = wl.map(keccak256);
+  const tree = new MerkleTree(leafNodes, keccak256, { sortPairs: true });
+
+  const [signer] = await hre.ethers.getSigners();
+  const tx = await contract.connect(signer).setMerkleRoot(tree.getHexRoot());
+
+  await tx.wait();
+});
+
+task("set-mint-phase", "sets mint phase")
+  .addPositionalParam("phase", "The mint phase")
+  .setAction(async ({ phase }) => {
+    const contract = new hre.ethers.Contract(
+      contractAddresses.Daydreams,
+      contractMeta.abi
+    );
+    const [signer] = await hre.ethers.getSigners();
+    const tx = await contract.connect(signer).setPhase(parseInt(phase));
+    await tx.wait();
+  });
 
 module.exports = {
   ...config,
