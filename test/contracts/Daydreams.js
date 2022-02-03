@@ -135,6 +135,20 @@ describe("contract", function () {
     });
 
     describe("presaleMint", function () {
+      const initMerkle = async (addresses, skip) => {
+        const leafs = addresses.map(keccak256);
+        const tree = new MerkleTree(leafs, keccak256, { sortPairs: true });
+
+        if (!skip) {
+          await nft.setMerkleRoot(tree.getHexRoot());
+        }
+        return {
+          tree,
+          proof: tree.getHexProof(keccak256(addresses[0])),
+          leaf: keccak256(addresses[0]),
+        };
+      };
+
       it("should reject phase 0 and 2", async () => {
         await nft.setPhase(0);
 
@@ -184,17 +198,83 @@ describe("contract", function () {
         ).to.be.revertedWith("Already claimed");
       });
 
-      it("should not allow if wrong amount of eth", async () => {});
+      it("should not allow if wrong amount of eth", async () => {
+        await nft.setPhase(1);
+        const { tree, proof, leaf } = await initMerkle([owner.address]);
 
-      it("should mint one medallion", async () => {});
+        await expect(
+          nft.presaleMint(1, proof, {
+            value: toWei(String(mintPrice * 2)),
+          })
+        ).to.be.revertedWith("Invalid funds");
+      });
 
-      it("should mint multiple medallions", async () => {});
+      it("should mint one", async () => {
+        await nft.setPhase(1);
+        const { tree, proof, leaf } = await initMerkle([owner.address]);
 
-      it("should revert if not owner", async () => {});
+        await expect(
+          nft.presaleMint(1, proof, {
+            value: toWei(mintPrice),
+          })
+        )
+          .to.emit(nft, "Transfer")
+          .withArgs(nullAddr, owner.address, 0);
+      });
 
-      it("should revert if already own", async () => {});
+      it("should mint multiple", async () => {});
 
-      it("should prevent minting over supply", async () => {});
+      it("should revert if already claimed", async () => {
+        await nft.setPhase(1);
+        const { tree, proof, leaf } = await initMerkle([owner.address]);
+
+        await expect(
+          nft.presaleMint(1, proof, {
+            value: toWei(mintPrice),
+          })
+        )
+          .to.emit(nft, "Transfer")
+          .withArgs(nullAddr, owner.address, 0);
+
+        await expect(
+          nft.presaleMint(1, proof, {
+            value: toWei(mintPrice),
+          })
+        ).to.be.revertedWith("Already claimed");
+      });
+
+      it("should prevent minting more than max", async () => {
+        await nft.setPhase(1);
+        const { tree, proof, leaf } = await initMerkle([owner.address]);
+
+        await expect(
+          nft.presaleMint(9, proof, {
+            value: toWei(String(mintPrice * 9)),
+          })
+        ).to.be.revertedWith("Minting too many");
+      });
+
+      it("should prevent minting over total", async () => {
+        await nft.setPhase(1);
+        const { tree, proof, leaf } = await initMerkle([
+          owner.address,
+          addr1.address,
+        ]);
+
+        await expect(
+          nft.presaleMint(8, proof, {
+            value: toWei(String(mintPrice * 8)),
+          })
+        ).to.emit(nft, "Transfer");
+
+        await expect(
+          nft
+            .connect(addr1)
+            .presaleMint(3, tree.getHexProof(keccak256(addr1.address)), {
+              value: toWei(String(mintPrice * 3)),
+            })
+        ).to.be.revertedWith("Minting exceeds total");
+      });
     });
 
     describe("withdraw", function () {
