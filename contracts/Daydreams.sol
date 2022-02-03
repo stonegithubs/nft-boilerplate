@@ -11,39 +11,41 @@ contract Daydreams is ERC721A, Ownable, ReentrancyGuard {
     address public proxyRegistryAddress;
     uint public total;
     uint8 public phase = 1;
-    uint8 public reservedSupply = 100;
     bytes32 public merkleRoot;
 
-    uint private constant MAX_MINT = 8;
-    uint private constant WL_MINT_PRICE = 0.06 ether;
-    uint private constant PUBLIC_MINT_PRICE = 0.06 ether;
+    uint public constant MAX_MINT = 8;
+    uint8 public constant RESERVED_SUPPLY = 100;
+    uint public constant PRESALE_MINT_PRICE = 0.06 ether;
+    uint public constant MINT_PRICE = 0.06 ether;
 
     address private treasury;
     string private baseURI;
     mapping(address => bool) private claimed;
 
     constructor(
-        address treasuryAddress,
-        address _proxyRegistryAddress,
+        address _treasury,
+        address _proxyRegistry,
         uint _total
     ) ERC721A("Daydreams", "DAYDREAM") {
-        treasury = treasuryAddress;
-        proxyRegistryAddress = _proxyRegistryAddress;
+        treasury = _treasury;
+        proxyRegistryAddress = _proxyRegistry;
         total = _total;
     }
 
+    receive() external payable {}
+
     //todo: add public can claim method, call from ui
 
-    function whitelistMint(uint256 _qty, bytes32[] calldata _merkleProof) external payable {
+    function presaleMint(uint256 _qty, bytes32[] calldata _merkleProof) external payable {
         uint supply = totalSupply();
         bytes32 leaf = keccak256(abi.encodePacked(_msgSender()));
 
+        require(phase == 1, "Mint not active");
         require(!claimed[msg.sender], "Already claimed");
         require(MerkleProof.verify(_merkleProof, merkleRoot, leaf), "Not on the list");
         require(_qty <= MAX_MINT, "Minting too many");
-        require(phase == 1, "Mint not active");
         require(supply + _qty <= total, "Minting exceeds total");
-        require(WL_MINT_PRICE * _qty == msg.value, "Invalid funds");
+        require(PRESALE_MINT_PRICE * _qty == msg.value, "Invalid funds");
 
         claimed[_msgSender()] = true;
         _safeMint(_msgSender(), _qty);
@@ -56,13 +58,18 @@ contract Daydreams is ERC721A, Ownable, ReentrancyGuard {
         require(_qty <= MAX_MINT, "Minting too many");
         require(phase == 2, "Mint not active");
         require(supply + _qty <= total, "Minting exceeds total");
-        require(PUBLIC_MINT_PRICE * _qty == msg.value, "Invalid funds");
+        require(MINT_PRICE * _qty == msg.value, "Invalid funds");
 
         _safeMint(_msgSender(), _qty);
     }
 
     function setMerkleRoot(bytes32 _merkleRoot) public onlyOwner {
         merkleRoot = _merkleRoot;
+    }
+
+    function isOnPresaleList(bytes32[] calldata _merkleProof) external view returns (bool) {
+        bytes32 leaf = keccak256(abi.encodePacked(_msgSender()));
+        return MerkleProof.verify(_merkleProof, merkleRoot, leaf);
     }
 
     function setBaseURI(string memory _baseURI) public onlyOwner {
@@ -74,42 +81,35 @@ contract Daydreams is ERC721A, Ownable, ReentrancyGuard {
         return string(abi.encodePacked(baseURI, Strings.toString(_tokenId)));
     }
 
-    function setPhase(uint8 value) public onlyOwner {
-        require(value <= 2, "Invalid phase");
-        phase = value;
+    function setPhase(uint8 _value) public onlyOwner {
+        require(_value <= 2, "Invalid phase");
+        phase = _value;
     }
-
-    receive() external payable {}
 
     function setProxyRegistryAddress(address _proxyRegistryAddress) external onlyOwner {
         proxyRegistryAddress = _proxyRegistryAddress;
     }
 
-    function withdraw() public nonReentrant onlyOwner {
-        //todo dont fuck iup
+    function withdraw() public nonReentrant {
+        require(treasury == _msgSender(), "Unauthorized");
         (bool success,) = _msgSender().call{value : address(this).balance}('');
         require(success, "Withdrawal failed");
     }
 
 
-    function isApprovedForAll(address owner, address operator) public view override returns (bool) {
+    function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
         // Enable gasless listings on opensea
         ProxyRegistry proxyRegistry = ProxyRegistry(proxyRegistryAddress);
-        if (address(proxyRegistry.proxies(owner)) == operator) {
+        if (address(proxyRegistry.proxies(_owner)) == _operator) {
             return true;
         }
 
-        return super.isApprovedForAll(owner, operator);
+        return super.isApprovedForAll(_owner, _operator);
     }
 
     function getBalance() external view returns(uint) {
         return (address(this)).balance;
     }
-}
-
-abstract contract ParentContract {
-    function ownerOf(uint256 tokenId) public virtual view returns (address);
-    function balanceOf(address owner) external virtual view returns (uint256 balance);
 }
 
 contract OwnableDelegateProxy {}

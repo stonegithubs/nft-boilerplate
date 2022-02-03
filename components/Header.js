@@ -14,7 +14,6 @@ import MenuItem from "@mui/material/MenuItem";
 import { useWeb3React } from "@web3-react/core";
 import Account from "../components/Account";
 import Balance from "../components/Balance";
-import Davatar from "@davatar/react";
 
 const pages = [];
 const settings = ["Disconnect"];
@@ -115,17 +114,7 @@ export default function Header() {
               {!active && <Typography>{error ? "🔴" : "🟠"}</Typography>}
               {active && (
                 <>
-                  <Balance />{" "}
-                  <Tooltip title="Open settings">
-                    <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                      <Davatar
-                        size={24}
-                        address={account}
-                        provider={provider} // optional
-                        generatedAvatarType="jazzicon" // optional, 'jazzicon' or 'blockies'
-                      />
-                    </IconButton>
-                  </Tooltip>
+                  <Balance /> <Tooltip title="Open settings"></Tooltip>
                   <Menu
                     sx={{ mt: "45px" }}
                     id="menu-appbar"

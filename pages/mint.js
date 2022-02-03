@@ -102,7 +102,7 @@ export default function Home() {
     const qty = 2;
 
     try {
-      const tx = await dd.whitelistMint(
+      const tx = await dd.presaleMint(
         qty,
         wlState.proof.map((i) => ethers.utils.hexZeroPad(i, 32)),
         {
